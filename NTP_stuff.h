@@ -7,17 +7,10 @@
 // 
 // 
 // 
-
-
 #include "credentials.h"
 #include <WiFi.h>
 #include "time.h"
 #include <TimeLib.h>
-
-//const char* mySSID = "RELOADED_optout_nomap";
-//const char* myPASSWORD = "%_Morpheus_1";
-
-
 
 
 struct tm ntp_tm;
