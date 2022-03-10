@@ -50,9 +50,6 @@ typedef struct
     uint16_t intensityControl;
 } wifiDataStruct;
 
-//const char* mySSID = "RELOADED_optout_nomap";
-//const char* myPASSWORD = "%_Morpheus_1";
-
 
 String hostname = "esp.lan";
 WebServer server(80);
