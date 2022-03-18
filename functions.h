@@ -1,6 +1,16 @@
 #ifndef _FUNCTIONS_H_
 #define _FUNCTIONS_H_
-
+/*
+status
+startOfDay
+endOfDay
+rampUpTime
+rampDownTime
+cct
+intensityStep
+intensityControl
+submit/send/SAVE
+*/
 /*
 Copyright (C) 2021 wk & david
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3.
@@ -199,23 +209,26 @@ const char* indexData PROGMEM = R"=====(
                 x = parseInt(obj.val());
                 y = x-step;            
                 obj.val(y);
-
-                function incIntensityVal(incItem, stepItem) {
+            }
+            
+            function incIntensityVal(incItem, stepItem)
+            {
                 obj = $('#' + incItem);
                 x = parseInt(obj.val());
                 objStep = $('#' + stepItem);
                 step = parseInt(objStep.val());
-                y = x+step;            
+                y = x + (1.0 * step);            
                 obj.val(y);
                 
             }
 
-            function decrIntensityVal(decrItem, stepItem) {
+            function decrIntensityVal(decrItem, stepItem)
+            {
                 obj = $('#' + decrItem);
                 x = parseInt(obj.val());
                 objStep = $('#' + stepItem);
                 step = parseInt(objStep.val());
-                y = x-step;            
+                y = x - (1.0 * step);            
                 obj.val(y);
             }
         </script>
@@ -272,20 +285,20 @@ const char* indexData PROGMEM = R"=====(
                                     </tr>
                                     <tr>
                                         <td>
-                                            <label for="rampTime">Ramp-Up Time</label>
+                                            <label for="rampUpTime">Ramp-Up Time(Minutes)</label>
 
                                         </td>
                                         <td>
-                                            <input type="text" name="rampTime" id="rampTime" value="30" />
+                                            <input type="text" name="rampUpTime" id="rampUpTime" value=15 />
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>
-                                            <label for="rampStopIntensity">Ramp-Up Stop Intensity(%)</label>
+                                            <label for="rampDownTime">Ramp-Down Time(Minutes)</label>
 
                                         </td>
                                         <td>
-                                            <input type="text" name="rampStopIntensity" id="rampStopIntensity" value="50.0" />
+                                            <input type="text" name="rampDownTime" id="rampDownTime" value="15" />
                                         </td>
                                     </tr>
                                     <tr>
@@ -302,31 +315,29 @@ const char* indexData PROGMEM = R"=====(
                                     </tr>
                                     <tr>
                                         <td>
-                                            <label for="intensityStep">Intensity Step Size</label>
+                                            <label for="intensityStep">Intensity Step Size(%)</label>
 
                                         </td>
                                         <td>
-                                            <input type="text" name="intensityStep" id="intensityStep" value="10" />
+                                            <input type="text" name="intensityStep" id="intensityStep" value="1.0" />
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>
-                                            <label for="intensityControl">Intensity Control</label>
+                                            <label for="intensityControl">Intensity Control(%)</label>
 
                                         </td>
                                         <td>
                                             <p class="btn btn-primary btn-sm" onclick="decrIntensityVal('intensityControl', 'intensityStep')">-</p>
-                                            <input type="text" name="intensityControl" id="intensityControl" value="0" />
+                                            <input type="text" name="intensityControl" id="intensityControl" value="0.0" />
                                             <p class="btn btn-primary btn-sm" onclick="incIntensityVal('intensityControl', 'intensityStep')">+</p>
                                         </td>
                                     </tr>
-                                    <tr>
                                     <tr>
                                         <td>
                                             <input type="submit" name="send" id="send" value="SAVE" />
                                         </td>
                                     </tr>
-
                                 </table>
                             </div>    
                         </form>
@@ -342,7 +353,5 @@ const char* indexData PROGMEM = R"=====(
 </html>
 
 )=====";
-
-
 
 #endif // _FUNCTIONS_H_
