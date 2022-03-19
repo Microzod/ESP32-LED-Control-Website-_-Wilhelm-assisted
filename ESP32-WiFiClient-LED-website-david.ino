@@ -8,15 +8,8 @@ You should have received a copy of the GNU Affero General Public License along w
 /*
  * ERRORS & THINGS TO CHANGE/FIX/ADD:
  * 
- * ¤1: När man trycker på en utav "On","Off","AUTO" knapparna så försvinner alla andra variablerna i URL'en,
- * om man sedan trycker på "SAVE" så byts Status ut emot alla dem andra variablerna men Status försvinner.
+ * ¤1: När man trycker på "SAVE" så byts Status alltid ut emot 'On' alternativet.
  * 
- * ¤2: Värdet som man skriver i "Intensity step size" används inte för att lägga till/ta bort ifrån "Intensity Control".
- * 
- * ¤3: När man trycker på "On" eller "AUTO" så behöver ESP32'n tillgång till ett par eller alla värdena i formuläret.
- *
- * ¤4: I URL'en så står det till exempel: "startOfDay=10%3A00". Är det så det kommer att se ut när ESP'en läser in String'en?
- *
  */
 
 //#define ESP32_RTOS  // Uncomment this line if you want to use the code with freertos only on the ESP32
@@ -171,15 +164,6 @@ void loop()
 
     
 }
-
-//    String status;
-//    time_t startOfDay;
-//    time_t endOfDay;
-//    uint16_t rampIncreament;
-//    time_t rampTime;
-//    uint16_t cct;
-//    uint16_t intensityStep;
-//    uint16_t intensityControl;
 
 void serialPrintDataStruct(serverDataStruct *s)
 {
