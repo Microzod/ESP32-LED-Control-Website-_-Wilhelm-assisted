@@ -1,4 +1,3 @@
-
 /*
 Copyright (C) 2021 wk & david
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3.
@@ -35,21 +34,41 @@ You should have received a copy of the GNU Affero General Public License along w
 #include <stdlib.h>     // int atoi (const char * str);
 
 typedef struct
-{
+{        
     String status;
     String startOfDay;
-    time_t startOfDay_hours;
-    time_t startOfDay_minutes;
     String endOfDay;
-    time_t endOfDay_hours;
-    time_t endOfDay_minutes;
-    time_t rampIncreament;
-    time_t rampTime;
+    time_t rampUpTime;
+    time_t rampDownTime;
     uint16_t cct;
-    uint16_t intensityStep;
-    uint16_t intensityControl;
-} wifiDataStruct;
+    double intensityStep;
+    double intensityControl;
+    
+    time_t startOfDay_minutes;
+    time_t startOfDay_hours;
+    time_t startOfDay_t;
+    time_t endOfDay_minutes;
+    time_t endOfDay_hours;
+    time_t endOfDay_t;
+    time_t rampUpTime_t;
+    time_t rampDownTime_t;
+} serverDataStruct;
 
+typedef struct
+{
+    String status;
+    int8_t status_num;
+    time_t startOfDay_t;
+    time_t endOfDay_t;
+    time_t rampUpTime_t;
+    time_t rampDownTime_t;
+    uint16_t cct;
+    double intensityStep;
+    double intensityControl;
+} dataResultStruct;
+
+serverDataStruct espReceiveData_struct = {"0", "0", "0", 0};
+dataResultStruct espResultData_struct = {"0", 0};
 
 String hostname = "esp.lan";
 WebServer server(80);
@@ -64,13 +83,15 @@ File fsUploadFile;
 //String status;
 //String ramp;
 
-
+void serialPrintDataStruct(serverDataStruct *s);
+void getData(serverDataStruct *s);
+void parseData(serverDataStruct *s);
+void entryPoint( );
 bool exists(String path);
 void writeArray();
 void readArray();
 void requestInfo();
 bool handleFileRead(String path);
-void handleFileList();
 void handleNotFound();
 void handleRoot();
 void writeFile(const char * path, String message);
@@ -160,7 +181,48 @@ void loop()
 //    uint16_t intensityStep;
 //    uint16_t intensityControl;
 
-void getData(wifiDataStruct *s)
+void serialPrintDataStruct(serverDataStruct *s)
+{
+    Serial.println("Data parsed from server json file:");
+    //Serial.println("");
+    Serial.print("Status: ");
+    Serial.println(s->status);
+
+    Serial.print("Start of day: ");
+    Serial.println(s->startOfDay);
+    Serial.print("Start of day(hours): ");
+    Serial.println(s->startOfDay_hours);
+    Serial.print("Start of day(minutes): ");
+    Serial.println(s->startOfDay_minutes);
+    Serial.print("Start of day(seconds): ");
+    Serial.println(s->startOfDay_t);
+
+    Serial.print("End of day: ");
+    Serial.println(s->endOfDay);
+    Serial.print("End of day(hours): ");
+    Serial.println(s->endOfDay_hours);
+    Serial.print("End of day(minutes): ");
+    Serial.println(s->endOfDay_minutes);
+    Serial.print("End of day(seconds): ");
+    Serial.println(s->endOfDay_t);
+    
+    Serial.print("Ramp-Up Time: ");
+    Serial.println(s->rampUpTime_t);
+    
+    Serial.print("Ramp-Down Time: ");
+    Serial.println(s->rampDownTime_t);
+    
+    Serial.print("Color Temperature(CCT): ");
+    Serial.println(s->cct);
+    
+    Serial.print("Intensity Step Size: ");
+    Serial.println(s->intensityStep);
+    
+    Serial.print("Intensity Control Level: ");
+    Serial.println(s->intensityControl);
+}
+
+void getData(serverDataStruct *s)
 {
     File file = FILESYSTEM.open("/config.json");
     char data[1024];
@@ -177,38 +239,64 @@ void getData(wifiDataStruct *s)
 
 
     // Vet ej om följande(resten utav denna functionen) kommer att fungera???
-    String status =       obj["status"];
-    String startOfDay =   obj["startOfDay"];
-    String endOfDay =     obj["endOfDay"];
-    s->rampIncreament =   obj["rampIncreament"];
-    s->rampTime =         obj["rampTime"];
-    s->cct =              obj["cct"];
-    s->intensityStep =    obj["intensityStep"];
-    s->intensityControl = obj["intensityControl"];
-    
+    String status =         obj["status"];      s->status = status;
+    String startOfDay =     obj["startOfDay"];  s->startOfDay = startOfDay;
+    String endOfDay =       obj["endOfDay"];    s->endOfDay = endOfDay;
+    s->rampUpTime =         obj["rampUpTime"];
+    s->rampDownTime =       obj["rampDownTime"];
+    s->cct =                obj["cct"];
+    s->intensityStep =      obj["intensityStep"];
+    s->intensityControl =   obj["intensityControl"];
+}
 
+void parseData(serverDataStruct *s)
+{
     char tempArray[2];
     int i;
-    
-    tempArray[0] = startOfDay[0];
-    tempArray[1] = startOfDay[1];
-    i = atoi (tempArray);
+    //time_t hours;
+    //time_t minutes;
+    tempArray[0] = s->startOfDay[0];
+    tempArray[1] = s->startOfDay[1];
+    i = atoi(tempArray);
     s->startOfDay_hours = (time_t)i;
     
-    tempArray[0] = startOfDay[5];
-    tempArray[1] = startOfDay[6];
-    i = atoi (tempArray);
+    tempArray[0] = s->startOfDay[3];
+    tempArray[1] = s->startOfDay[4];
+    i = atoi(tempArray);
     s->startOfDay_minutes = (time_t)i;
+
+    s->startOfDay_t = (60 * s->startOfDay_minutes) + (3600 * s->startOfDay_hours);
     
-    tempArray[0] = endOfDay[0];
-    tempArray[1] = endOfDay[1];
-    i = atoi (tempArray);
+    tempArray[0] = s->endOfDay[0];
+    tempArray[1] = s->endOfDay[1];
+    i = atoi(tempArray);
     s->endOfDay_hours = (time_t)i;
     
-    tempArray[0] = endOfDay[5];
-    tempArray[1] = endOfDay[6];
-    i = atoi (tempArray);
+    tempArray[0] = s->endOfDay[3];
+    tempArray[1] = s->endOfDay[4];
+    i = atoi(tempArray);
     s->endOfDay_minutes = (time_t)i;
+
+    s->endOfDay_t = (60 * s->endOfDay_minutes) + (3600 * s->endOfDay_hours);
+    
+    s->rampUpTime_t = (s->rampUpTime * 60);
+    s->rampDownTime_t = (s->rampDownTime * 60);
+
+    //serialPrintDataStruct(s);
+}
+
+// This function should be used to interface with the rest of the system
+void entryPoint( )
+{
+    
+    
+    // load the config file in order to access stored values
+    readArray();
+    
+    getData(&espReceiveData_struct);
+    parseData(&espReceiveData_struct);
+    serialPrintDataStruct(&espReceiveData_struct);
+
 }
 
 bool exists(String path)
@@ -275,40 +363,6 @@ void requestInfo()
         Serial.println(server.argName(i) + ": " + server.arg(i));
     }
 }
-
-// This function should be used to interface with the rest of the system
-void entryPoint( ) {
-    Serial.println("* This code should run whenever a update / change has occured to the configuration. *");
-    
-    // load the config file in order to access stored values
-    readArray();
-    
-    // Get status value
-    const char* status = obj["status"];
-    Serial.println(status);
-
-    // Get start of day value
-    const char* start = obj["startOfDay"];
-    Serial.print("Start of day: ");
-    Serial.println(start);
-
-     // Get start of day value
-    const char* endOfDay = obj["endOfDay"];
-    Serial.print("End of day: ");
-    Serial.println(endOfDay);
-
-     // Ramp increment
-    int ramp = obj["rampIncreament"];
-    Serial.print("Ramp increment: ");
-    Serial.println(ramp);
-    
-    // Ramp time
-    float rampTime = obj["rampTime"];
-    Serial.print("Ramp time: ");
-    Serial.println(rampTime);
-
-}
-
 
 bool handleFileRead(String path)
 {
