@@ -1,16 +1,6 @@
 #ifndef _FUNCTIONS_H_
 #define _FUNCTIONS_H_
-/*
-status
-startOfDay
-endOfDay
-rampUpTime
-rampDownTime
-cct
-intensityStep
-intensityControl
-submit/send/SAVE
-*/
+
 /*
 Copyright (C) 2021 wk & david
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3.
@@ -65,11 +55,9 @@ const char* indexData PROGMEM = R"=====(
 <!DOCTYPE html>
 <html lang="en">
     <head>
-
         <title>
-            ESP LED
+            ESP LED - Control
         </title>
-
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 
         <style>
@@ -82,6 +70,27 @@ const char* indexData PROGMEM = R"=====(
             h1,h2,h3 {
                 color: #c1c1c1;
             }
+           
+            h1 {
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            h2 {
+                font-size: 15px;
+                font-weight: bold;
+            }
+
+            h3 {
+                font-size: 14px;
+                font-weight: bold;
+            }
+
+            table {
+                border-collapse:separate; 
+                border-spacing: 3px;
+            }
+
 
             nav {
                 width: 100%;
@@ -111,6 +120,8 @@ const char* indexData PROGMEM = R"=====(
             }
 
             .row.content {
+                border: 0px solid black;
+                padding: 15px 0px 15px 0px;
                 height: 450px;
             }
 
@@ -138,7 +149,10 @@ const char* indexData PROGMEM = R"=====(
                     height: auto;
                     padding: 15px;
                 }
-            .row.content {height:auto;}
+
+                .row.content { 
+                    height:auto;
+                }
             }
 
             .midContent {
@@ -154,7 +168,7 @@ const char* indexData PROGMEM = R"=====(
                 background-color: #272727;
                 width: 86%;
                 -webkit-box-shadow: 0px 5px 13px -1px rgba(0,0,0,0.46);
-            box-shadow: 0px 5px 13px -1px rgba(0,0,0,0.46);
+                box-shadow: 0px 5px 13px -1px rgba(0,0,0,0.46);
             }
 
             #editMsg {
@@ -166,6 +180,21 @@ const char* indexData PROGMEM = R"=====(
                 color: #c1c1c1;
             }
     
+            #infoMsgContainer {
+                border: 0px solid black; 
+                left: -25px; 
+            }
+
+            #infoMsg {
+                position: relative;
+                background-color: #2B2B2B;
+                box-shadow: 0px 5px 13px -1px #1D1D1D;
+                width: 99%;
+                border-radius: 4px;
+                text-align: left;
+                padding: 4px 4px 5px 10px; 
+            }
+
             #topControl {
                 position: realtive; 
                 border: 0px solid black;
@@ -177,24 +206,54 @@ const char* indexData PROGMEM = R"=====(
         
         }
         </style>
-
-
-
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
         <script>
-            //alert("nigger");
-            var url = "http://esp.lan/config.json";
-            //var url = \"http://esp.lan/config.json\";\
-            $.getJSON(url, function(data) {
-                for (var i in data) {
-                    //alert(i);
-                    $('input[name="'+i+'"]').val(data[i]);
-                }
+            $(document).ready(function(){
+                // Load config file from the HTTP-server running on the ESP32                            
+                var url = "http://esp.lan/config.json";
+                // Temporary config used for testing
+                //var url = "http://vps.wkall.org/config.json";
+
+                $.getJSON(url, function(data) {
+                    for (var i in data) {
+                        if(i == "status") {
+                            $("#mySelect").val(data[i].toLowerCase());
+                            setVisible(data[i].toLowerCase());
+                        } 
+                        $('input[name="'+i+'"]').val(data[i]);
+                    }
+                });
+                
+                // Set visible content based on selected value
+                $("#mySelect").change(function(){
+                    val = $("#mySelect").val();
+                    setVisible(val);
+                }); 
             });
+
+            function setVisible(status) {
+                switch(status) {
+                    case 'on':
+                        $(".off-vis").hide();
+                        $(".auto-vis").hide();
+                        $(".on-vis").show();
+                        break;
+                    case 'off':
+                        $(".on-vis").hide();
+                        $(".auto-vis").hide();
+                        $(".off-vis").show();
+                        break;
+                    case 'auto':
+                        $(".on-vis").hide();
+                        $(".off-vis").hide();
+                        $(".auto-vis").show();
+                        break;
+                }
+            }
 
             function incVal(incItem, step) {
                 obj = $('#' + incItem);
@@ -210,31 +269,26 @@ const char* indexData PROGMEM = R"=====(
                 y = x-step;            
                 obj.val(y);
             }
-            
-            function incIntensityVal(incItem, stepItem)
-            {
+                function incIntensityVal(incItem, stepItem) {
                 obj = $('#' + incItem);
                 x = parseInt(obj.val());
                 objStep = $('#' + stepItem);
                 step = parseInt(objStep.val());
-                y = x + (1.0 * step);            
+                y = x+step;            
                 obj.val(y);
                 
             }
 
-            function decrIntensityVal(decrItem, stepItem)
-            {
+            function decrIntensityVal(decrItem, stepItem) {
                 obj = $('#' + decrItem);
                 x = parseInt(obj.val());
                 objStep = $('#' + stepItem);
                 step = parseInt(objStep.val());
-                y = x - (1.0 * step);            
+                y = x-step;            
                 obj.val(y);
             }
         </script>
-
     </head>
-
     <body>
         <nav class="navbar navbar-inverse">
                 <div class="navbar-header">
@@ -242,16 +296,13 @@ const char* indexData PROGMEM = R"=====(
                 </div>
         </nav>
 
-        <div class="container-fluid text-center midWrapper">    
+        <div class="container-fluid text-center midWrapper">
             <div class="container-fluid midContentWrapper">
                 <div class="row content">
-                    <div class="col-sm-8 text-left"> 
-                        <div id="topControl">
-                         <!--   <h4>Status</h4>
-                            <a href="?status=on"><button>ON</button></a>
-                            <a href="?status=off"><button>OFF</button></a>    
-                            <a href="?status=auto"><button>AUTO</button></a>--> 
-                        </div>
+                    <div class="col-sm-7 text-left">
+                        <h3>LED Settings</h3>
+                    </div>
+                    <div class="col-sm-7 text-left">
                         <form method="GET" action="">    
                             <div id="bottomControl">
                                 <table>
@@ -260,14 +311,14 @@ const char* indexData PROGMEM = R"=====(
                                             <label for="status">Status</label>
                                         </td>
                                         <td>
-                                            <select name="status" id="status">
+                                            <select name="status" id="mySelect">
                                                 <option value="on">On</option>
                                                 <option value="auto">Auto</option>
                                                 <option value="off">Off</option>
                                             </select>
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr class="auto-vis">
                                         <td>
                                             <label for="startOfDay">Start of Day</label>
                                         </td>
@@ -275,7 +326,7 @@ const char* indexData PROGMEM = R"=====(
                                             <input type="text" name="startOfDay" id="startOfDay" value="08:00" />
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr class="auto-vis">
                                         <td>
                                             <label for="endOfDay">End of Day</label>
                                         </td>
@@ -283,25 +334,25 @@ const char* indexData PROGMEM = R"=====(
                                             <input type="text" name="endOfDay" id="endOfDay" value="00:00" />
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr class="auto-vis">
                                         <td>
-                                            <label for="rampUpTime">Ramp-Up Time(Minutes)</label>
+                                            <label for="rampTime">Ramp-Up Time</label>
 
                                         </td>
                                         <td>
-                                            <input type="text" name="rampUpTime" id="rampUpTime" value=15 />
+                                            <input type="text" name="rampTime" id="rampTime" value="30" />
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr class="auto-vis">
                                         <td>
-                                            <label for="rampDownTime">Ramp-Down Time(Minutes)</label>
+                                            <label for="rampStopIntensity">Ramp-Up Stop Intensity(%)</label>
 
                                         </td>
                                         <td>
-                                            <input type="text" name="rampDownTime" id="rampDownTime" value="15" />
+                                            <input type="text" name="rampStopIntensity" id="rampStopIntensity" value="50.0" />
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr class="on-vis auto-vis">
                                         <td>
                                             <label for="cct">CCT(Kelvin)</label>
 
@@ -313,23 +364,23 @@ const char* indexData PROGMEM = R"=====(
 
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr class="on-vis auto-vis">
                                         <td>
-                                            <label for="intensityStep">Intensity Step Size(%)</label>
+                                            <label for="intensityStep">Intensity Step Size</label>
 
                                         </td>
                                         <td>
-                                            <input type="text" name="intensityStep" id="intensityStep" value="1.0" />
+                                            <input type="text" name="intensityStep" id="intensityStep" value="10" />
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr class="on-vis auto-vis">
                                         <td>
-                                            <label for="intensityControl">Intensity Control(%)</label>
+                                            <label for="intensityControl">Intensity Control</label>
 
                                         </td>
                                         <td>
                                             <p class="btn btn-primary btn-sm" onclick="decrIntensityVal('intensityControl', 'intensityStep')">-</p>
-                                            <input type="text" name="intensityControl" id="intensityControl" value="0.0" />
+                                            <input type="text" name="intensityControl" id="intensityControl" value="0" />
                                             <p class="btn btn-primary btn-sm" onclick="incIntensityVal('intensityControl', 'intensityStep')">+</p>
                                         </td>
                                     </tr>
@@ -338,20 +389,37 @@ const char* indexData PROGMEM = R"=====(
                                             <input type="submit" name="send" id="send" value="SAVE" />
                                         </td>
                                     </tr>
+
                                 </table>
                             </div>    
                         </form>
                     </div>
+                    <div id="infoMsgContainer" class="container-fluid text-right col-sm-5">
+                        <div id="infoMsg">
+                            <div class="on-vis">
+                                <p><b>Status</b>&nbsp;<i>on</i></p>
+                            </div>
+                            <div class="auto-vis">
+                                <p><b>Status</b>&nbsp;<i>auto</i></p>
+                            </div>
+                            <div class="off-vis">
+                                <p><b>Status</b>&nbsp;<i>off</i></p>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
 
         <footer class="container-fluid text-left fixed-bottom">
-            <p>&copy; Wille+</p>
+            <p>&copy; +NIGGER</p>
         </footer>
     </body>
 </html>
 
 )=====";
+
+
 
 #endif // _FUNCTIONS_H_
