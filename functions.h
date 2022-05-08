@@ -413,7 +413,7 @@ const char* indexData PROGMEM = R"=====(
         </div>
 
         <footer class="container-fluid text-left fixed-bottom">
-            <p>&copy; +NIGGER</p>
+            <p>&copy; +WILLE</p>
         </footer>
     </body>
 </html>
