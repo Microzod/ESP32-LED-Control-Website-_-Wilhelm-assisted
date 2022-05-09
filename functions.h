@@ -336,20 +336,20 @@ const char* indexData PROGMEM = R"=====(
                                     </tr>
                                     <tr class="auto-vis">
                                         <td>
-                                            <label for="rampTime">Ramp-Up Time</label>
+                                            <label for="sunriseTime">Sunrise Length(Minutes)</label>
 
                                         </td>
                                         <td>
-                                            <input type="text" name="rampTime" id="rampTime" value="30" />
+                                            <input type="text" name="sunriseTime" id="sunriseTime" value="30" />
                                         </td>
                                     </tr>
                                     <tr class="auto-vis">
                                         <td>
-                                            <label for="rampStopIntensity">Ramp-Up Stop Intensity(%)</label>
+                                            <label for="sunsetTime">Sunset Duration(Minutes)</label>
 
                                         </td>
                                         <td>
-                                            <input type="text" name="rampStopIntensity" id="rampStopIntensity" value="50.0" />
+                                            <input type="text" name="sunsetTime" id="sunsetTime" value="30" />
                                         </td>
                                     </tr>
                                     <tr class="on-vis auto-vis">
@@ -370,7 +370,7 @@ const char* indexData PROGMEM = R"=====(
 
                                         </td>
                                         <td>
-                                            <input type="text" name="intensityStep" id="intensityStep" value="10" />
+                                            <input type="text" name="intensityStep" id="intensityStep" value="1.0" />
                                         </td>
                                     </tr>
                                     <tr class="on-vis auto-vis">
@@ -380,7 +380,7 @@ const char* indexData PROGMEM = R"=====(
                                         </td>
                                         <td>
                                             <p class="btn btn-primary btn-sm" onclick="decrIntensityVal('intensityControl', 'intensityStep')">-</p>
-                                            <input type="text" name="intensityControl" id="intensityControl" value="0" />
+                                            <input type="text" name="intensityControl" id="intensityControl" value="50.0" />
                                             <p class="btn btn-primary btn-sm" onclick="incIntensityVal('intensityControl', 'intensityStep')">+</p>
                                         </td>
                                     </tr>
@@ -419,7 +419,4 @@ const char* indexData PROGMEM = R"=====(
 </html>
 
 )=====";
-
-
-
 #endif // _FUNCTIONS_H_
