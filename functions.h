@@ -200,7 +200,8 @@ const char* indexData PROGMEM = R"=====(
                 border: 0px solid black;
                 padding: 10px 0px 10px 5px;
             }
-          
+
+                    
         h1 { 
             font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 24px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 26.4px; } h3 { font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px; } p { font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 20px; } blockquote { font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 21px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 30px; } pre { font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 18.5667px; }\ 
         
@@ -212,49 +213,118 @@ const char* indexData PROGMEM = R"=====(
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
         <script>
-            $(document).ready(function(){
-                // Load config file from the HTTP-server running on the ESP32                            
+            $(document).ready(function(){ 
+                parseConfig();
+               
+                var slider = document.getElementById("cct");
+                var output = document.getElementById("cct_out");
+
+                slider.oninput = function() {
+                    output.innerHTML = this.value;
+                }
+
+                var slider1 = document.getElementById("intensityControl");
+                var output1 = document.getElementById("int_out");
+
+                slider1.oninput = function() {
+                  output1.innerHTML = this.value;
+                }
+          
+                var slider2 = document.getElementById("intensityControl");
+                var output2 = document.getElementById("int_out");
+
+                slider2.oninput = function() {
+                    output2.innerHTML = this.value;
+                }
+
+                $(".checkSel").click(function(){
+                    formSend();
+                    parseConfig();
+                });
+
+                $(".powerBtn").click(function(){
+                    var power = $(this).val();
+                    $("#p").val(power);
+                    formSend();
+                    parseConfig();
+                });
+
+                //powerBtn                            
+
+                $("#mySelect").change(function(){
+                    val = $("#mySelect").val();
+                    formSend();
+                    parseConfig();
+                    //setVisible(val);
+                });
+
+
+                var timeOut;
+
+                $('.autoControlSend').change(function() {
+                    clearTimeout(timeOut);
+                    timeOut = setTimeout(function() {
+                        formSend();
+                        parseConfig();
+
+                    }, 1000);
+                });
+
+            });
+
+            function formSend() {
+                //var url = "http://esp-wk.lan";
+                var url = "http://esp.lan";
+
+                $.ajax({
+                    url: url,
+                    type: 'get',
+                    dataType: 'json',
+                    data: $('form#controlForm').serialize(),
+                    success: function(data) {
+                        //alert("aids");
+                    }
+                });
+            }
+
+            function parseConfig() {
+                // DEV URL
+                //var url = "http://esp-wk.lan/config.json";
                 var url = "http://esp.lan/config.json";
-                // Temporary config used for testing
-                //var url = "http://vps.wkall.org/config.json";
+
 
                 $.getJSON(url, function(data) {
                     for (var i in data) {
                         if(i == "status") {
                             $("#mySelect").val(data[i].toLowerCase());
-                            setVisible(data[i].toLowerCase());
+                            //setVisible(data[i].toLowerCase());
                         } 
                         $('input[name="'+i+'"]').val(data[i]);
                     }
                 });
-                
-                // Set visible content based on selected value
-                $("#mySelect").change(function(){
-                    val = $("#mySelect").val();
-                    setVisible(val);
-                }); 
-            });
+            }
 
             function setVisible(status) {
                 switch(status) {
                     case 'on':
                         $(".off-vis").hide();
                         $(".auto-vis").hide();
-                        $(".on-vis").show();
+                        $(".on-vis").fadeIn(0);
                         break;
                     case 'off':
                         $(".on-vis").hide();
                         $(".auto-vis").hide();
-                        $(".off-vis").show();
+                        $(".off-vis").fadeIn(0);
                         break;
                     case 'auto':
                         $(".on-vis").hide();
                         $(".off-vis").hide();
-                        $(".auto-vis").show();
+                        $(".auto-vis").fadeIn(0);
                         break;
                 }
             }
 
+            
             function incVal(incItem, step) {
                 obj = $('#' + incItem);
                 x = parseInt(obj.val());
@@ -269,7 +339,8 @@ const char* indexData PROGMEM = R"=====(
                 y = x-step;            
                 obj.val(y);
             }
-                function incIntensityVal(incItem, stepItem) {
+            
+            function incIntensityVal(incItem, stepItem) {
                 obj = $('#' + incItem);
                 x = parseInt(obj.val());
                 objStep = $('#' + stepItem);
@@ -303,27 +374,32 @@ const char* indexData PROGMEM = R"=====(
                         <h3>LED Settings</h3>
                     </div>
                     <div class="col-sm-7 text-left">
-                        <form method="GET" action="">    
-                            <div id="bottomControl">
+                        <form method="GET" action="" id="controlForm">    
+                            <div id="bottomControl" class="form-group">
                                 <table>
-                                    <tr>
+                                   <!-- <tr>
                                         <td>
                                             <label for="status">Status</label>
                                         </td>
                                         <td>
-                                            <select name="status" id="mySelect">
+                                            <select name="status" id="mySelect" class="input-group mb-3">
                                                 <option value="on">On</option>
                                                 <option value="auto">Auto</option>
                                                 <option value="off">Off</option>
                                             </select>
                                         </td>
                                     </tr>
+                                    -->
                                     <tr class="auto-vis">
                                         <td>
                                             <label for="startOfDay">Start of Day</label>
                                         </td>
                                         <td>
-                                            <input type="text" name="startOfDay" id="startOfDay" value="08:00" />
+                                            <input class="form-control form-control-sm" placeholder=".form-control-sm" type="text" name="startOfDay" id="startOfDay" value="08:00" />
+
+                                        </td>
+                                        <td valign="top">
+                                            <input type="checkbox" class="form-check-input checkSel" name="startOfDayCheck" value="1"  class="autoControlSend"  />
                                         </td>
                                     </tr>
                                     <tr class="auto-vis">
@@ -331,25 +407,29 @@ const char* indexData PROGMEM = R"=====(
                                             <label for="endOfDay">End of Day</label>
                                         </td>
                                         <td>
-                                            <input type="text" name="endOfDay" id="endOfDay" value="00:00" />
+                                            <input class="form-control form-control-sm" placeholder=".form-control-sm" type="text" name="endOfDay" id="endOfDay" value="00:00" />
+                                        </td>
+                                        <td valign="top">
+                                            <input type="checkbox" class="form-check-input checkSel" name="endOfDayCheck" value="1"  class="autoControlSend" />
+                                        </td>
+
+                                    </tr>
+                                    <tr class="auto-vis">
+                                        <td>
+                                            <label for="rampTime">Sunrise Length(Minutes)</label>
+
+                                        </td>
+                                        <td>
+                                            <input class="form-control form-control-sm" placeholder=".form-control-sm" type="text" name="sunriseLength" id="sunriseLength" value="30" />
                                         </td>
                                     </tr>
                                     <tr class="auto-vis">
                                         <td>
-                                            <label for="sunriseTime">Sunrise Length(Minutes)</label>
+                                            <label for="rampStopIntensity">Sunset Length(Minutes)</label>
 
                                         </td>
                                         <td>
-                                            <input type="text" name="sunriseTime" id="sunriseTime" value="30" />
-                                        </td>
-                                    </tr>
-                                    <tr class="auto-vis">
-                                        <td>
-                                            <label for="sunsetTime">Sunset Duration(Minutes)</label>
-
-                                        </td>
-                                        <td>
-                                            <input type="text" name="sunsetTime" id="sunsetTime" value="30" />
+                                            <input class="form-control form-control-sm" placeholder=".form-control-sm" type="text" name="sunsetLength" id="sunsetLength" value="30" />
                                         </td>
                                     </tr>
                                     <tr class="on-vis auto-vis">
@@ -358,19 +438,12 @@ const char* indexData PROGMEM = R"=====(
 
                                         </td>
                                         <td>
-                                            <p class="btn btn-primary btn-sm" onclick="decrVal('cct', 100)">-</p>
-                                            <input type="text" name="cct" id="cct" value="3800" />
-                                            <p class="btn btn-primary btn-sm" onclick="incVal('cct',100)">+</p>
-
-                                        </td>
-                                    </tr>
-                                    <tr class="on-vis auto-vis">
-                                        <td>
-                                            <label for="intensityStep">Intensity Step Size</label>
-
+                                            <input type="range" min="2700" max="5000" step="100" name="cct" class="autoControlSend" id="cct" />
                                         </td>
                                         <td>
-                                            <input type="text" name="intensityStep" id="intensityStep" value="1.0" />
+                                            <div id="cct_out">
+
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr class="on-vis auto-vis">
@@ -379,14 +452,22 @@ const char* indexData PROGMEM = R"=====(
 
                                         </td>
                                         <td>
-                                            <p class="btn btn-primary btn-sm" onclick="decrIntensityVal('intensityControl', 'intensityStep')">-</p>
-                                            <input type="text" name="intensityControl" id="intensityControl" value="50.0" />
-                                            <p class="btn btn-primary btn-sm" onclick="incIntensityVal('intensityControl', 'intensityStep')">+</p>
+                                            <input type="range" step="1" min="0" max="4095" name="intensityControl"  class="autoControlSend" id="intensityControl" />
+                                        </td>
+                                        <td>
+                                            <div id="int_out">
+
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>
-                                            <input type="submit" name="send" id="send" value="SAVE" />
+                                            <input type="submit" name="send" class="btn btn-primary btn-sm" id="send" value="SAVE" />
+                                        </td>
+                                        <td>
+                                            <input type="hidden" name="p" id="p" value="1" />
+                                            <button type="button" value="1" class="btn btn-success powerBtn">on</button>
+                                            <button type="button" value="0" class="btn btn-danger powerBtn">off</button>
                                         </td>
                                     </tr>
 
@@ -413,10 +494,13 @@ const char* indexData PROGMEM = R"=====(
         </div>
 
         <footer class="container-fluid text-left fixed-bottom">
-            <p>&copy; +WILLE</p>
+            <p>&copy; +NIGGER</p>
         </footer>
     </body>
 </html>
 
 )=====";
+
+
+
 #endif // _FUNCTIONS_H_
